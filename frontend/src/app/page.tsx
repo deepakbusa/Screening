@@ -167,8 +167,9 @@ export default function DashboardPage() {
         setSecurity(s);
         setLoading(false);
       })
-      .catch(() => {
-        setError("Failed to load data");
+      .catch((error) => {
+        console.error('Dashboard data fetch error:', error);
+        setError(`Failed to load data: ${error.message}. Please ensure the backend API is running and accessible.`);
         setLoading(false);
       });
   }, []);
