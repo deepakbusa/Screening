@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from routers import financial, hr, rnd, security
 import os
 
@@ -11,12 +12,15 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",  # Local development
         "https://screening-frontend.vercel.app",  # Vercel frontend
+        "https://screening-deepakbusa.vercel.app",  # Alternative Vercel domain
         "https://*.vercel.app",  # Any Vercel deployment
         "https://*.railway.app",  # Any Railway deployment
+        "*",  # Allow all origins for debugging
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(financial.router, prefix="/api/financial", tags=["Financial"])
@@ -31,6 +35,18 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+@app.options("/{full_path:path}")
+async def options_handler(request: Request, full_path: str):
+    """Handle CORS preflight requests"""
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn
