@@ -3,7 +3,7 @@
 export const API_CONFIG = {
   // For Railway deployment, use your Railway URL
   // Example: https://your-app-name.railway.app/api
-  BASE_URL: process.env.NEXT_PUBLIC_API_BASE || "https://your-backend-url.railway.app/api",
+  BASE_URL: process.env.NEXT_PUBLIC_API_BASE || "https://screening-production.up.railway.app/api",
   
   // For local development
   LOCAL_URL: "http://localhost:8000/api",

@@ -303,7 +303,7 @@ export default function DashboardPage() {
             options={{ responsive: true, plugins: { legend: { display: false } } }}
           />
         </ChartCard>
-      </div>
+    </div>
       <InsightCard headline={`Aerospace R&D drives ${(aerospaceShare * 100).toFixed(1)}% of 2024 revenue`}>
         <Pie
           data={{
