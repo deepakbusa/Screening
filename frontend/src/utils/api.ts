@@ -45,9 +45,10 @@ export const fetchFinancial = async () => {
   try {
     const res = await api.get('/financial/');
     return res.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to fetch financial data:', error);
-    throw new Error(`Financial API Error: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Financial API Error: ${errorMessage}`);
   }
 };
 
@@ -55,9 +56,10 @@ export const fetchHR = async () => {
   try {
     const res = await api.get('/hr/');
     return res.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to fetch HR data:', error);
-    throw new Error(`HR API Error: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`HR API Error: ${errorMessage}`);
   }
 };
 
@@ -65,9 +67,10 @@ export const fetchRND = async () => {
   try {
     const res = await api.get('/rnd/');
     return res.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to fetch R&D data:', error);
-    throw new Error(`R&D API Error: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`R&D API Error: ${errorMessage}`);
   }
 };
 
@@ -75,8 +78,9 @@ export const fetchSecurity = async () => {
   try {
     const res = await api.get('/security/');
     return res.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to fetch security data:', error);
-    throw new Error(`Security API Error: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Security API Error: ${errorMessage}`);
   }
 }; 
