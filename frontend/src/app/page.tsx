@@ -35,11 +35,120 @@ ChartJS.register(
   ArcElement
 );
 
+interface FinancialRecord {
+  Division: string;
+  Quarter: string;
+  Year: number;
+  Revenue_M: number;
+  Operating_Costs_M: number;
+  Net_Profit_M: number;
+  Employee_Count: number;
+  RD_Investment_M: number;
+  Market_Share_Pct?: number;
+  Customer_Satisfaction_Score: number;
+}
+
+interface FinancialData {
+  records: FinancialRecord[];
+  summary: {
+    total_revenue: number;
+    total_profit: number;
+    avg_satisfaction: number;
+    total_employees: number;
+    divisions: string[];
+  };
+}
+
+interface HRRecord {
+  Department: string;
+  Employee_Level: string;
+  Date: string;
+  Retention_Rate_Pct: number;
+  Training_Hours_Annual: number;
+  Performance_Rating: number;
+  Salary_Band: string;
+  Benefits_Utilization_Pct: number;
+  Security_Clearance_Level: string;
+  Internal_Promotions: number;
+  Diversity_Index: number;
+  Employee_Satisfaction_Score: number;
+}
+
+interface HRData {
+  records: HRRecord[];
+  summary: {
+    avg_retention_rate: number;
+    avg_satisfaction: number;
+    avg_performance: number;
+    avg_diversity_index: number;
+    total_promotions: number;
+    departments: string[];
+    employee_levels: string[];
+  };
+}
+
+interface RNDRecord {
+  Project_ID: string;
+  Project_Name: string;
+  Division: string;
+  Start_Date: string;
+  Status: string;
+  Budget_Allocated_M: number;
+  Budget_Spent_M: number;
+  Research_Category: string;
+  Patent_Applications: number;
+  Commercialization_Potential: string;
+  Timeline_Adherence_Pct: number;
+  Lead_Scientist: string;
+  Security_Classification: string;
+}
+
+interface RNDData {
+  records: RNDRecord[];
+  summary: {
+    total_projects: number;
+    active_projects: number;
+    completed_projects: number;
+    total_budget_allocated: number;
+    total_budget_spent: number;
+    avg_timeline_adherence: number;
+    total_patents: number;
+    divisions: string[];
+    research_categories: string[];
+  };
+}
+
+interface SecurityRecord {
+  Date: string;
+  District: string;
+  Security_Incidents: number;
+  Response_Time_Minutes: number;
+  Wayne_Tech_Deployments: number;
+  Public_Safety_Score: number;
+  Infrastructure_Investments_M: number;
+  Crime_Prevention_Effectiveness_Pct: number;
+  Community_Engagement_Events: number;
+  Employee_Safety_Index: number;
+}
+
+interface SecurityData {
+  records: SecurityRecord[];
+  summary: {
+    total_incidents: number;
+    avg_response_time: number;
+    avg_safety_score: number;
+    total_investments: number;
+    avg_crime_prevention: number;
+    total_tech_deployments: number;
+    districts: string[];
+  };
+}
+
 export default function DashboardPage() {
-  const [financial, setFinancial] = useState<any>(null);
-  const [hr, setHR] = useState<any>(null);
-  const [rnd, setRND] = useState<any>(null);
-  const [security, setSecurity] = useState<any>(null);
+  const [financial, setFinancial] = useState<FinancialData | null>(null);
+  const [hr, setHR] = useState<HRData | null>(null);
+  const [rnd, setRND] = useState<RNDData | null>(null);
+  const [security, setSecurity] = useState<SecurityData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +167,7 @@ export default function DashboardPage() {
         setSecurity(s);
         setLoading(false);
       })
-      .catch((e) => {
+      .catch(() => {
         setError("Failed to load data");
         setLoading(false);
       });
@@ -69,38 +178,42 @@ export default function DashboardPage() {
   if (error)
     return <div className="p-8 text-center text-red-500">{error}</div>;
 
+  if (!financial || !hr || !rnd || !security) {
+    return <div className="p-8 text-center text-red-500">No data available</div>;
+  }
+
   // Financial chart: Revenue by Division (latest year)
-  const latestYear = Math.max(...financial.records.map((r: any) => r.Year));
+  const latestYear = Math.max(...financial.records.map((r: FinancialRecord) => r.Year));
   const revenueByDivision = financial.records
-    .filter((r: any) => r.Year === latestYear)
-    .reduce((acc: any, r: any) => {
+    .filter((r: FinancialRecord) => r.Year === latestYear)
+    .reduce((acc: Record<string, number>, r: FinancialRecord) => {
       acc[r.Division] = (acc[r.Division] || 0) + r.Revenue_M;
       return acc;
     }, {});
 
   // Financial chart: Profit trend (all divisions)
-  const profitTrend = financial.records.filter((r: any) => r.Division === "Wayne Aerospace");
+  const profitTrend = financial.records.filter((r: FinancialRecord) => r.Division === "Wayne Aerospace");
 
   // HR chart: Retention rates by department (latest month)
   const latestHRDate = hr.records[hr.records.length - 1].Date;
-  const retentionByDept = hr.records.filter((r: any) => r.Date === latestHRDate);
+  const retentionByDept = hr.records.filter((r: HRRecord) => r.Date === latestHRDate);
 
   // R&D chart: Budget vs Spending by project (top 5)
   const topRND = rnd.records.slice(0, 5);
 
   // Security chart: Incidents by district (latest date)
   const latestSecDate = security.records[security.records.length - 1].Date;
-  const secByDistrict = security.records.filter((r: any) => r.Date === latestSecDate);
+  const secByDistrict = security.records.filter((r: SecurityRecord) => r.Date === latestSecDate);
 
   // Insight: Aerospace R&D drives 40% of 2024 revenue
   const aerospace2024 = financial.records.filter(
-    (r: any) => r.Division === "Wayne Aerospace" && r.Year === 2024
+    (r: FinancialRecord) => r.Division === "Wayne Aerospace" && r.Year === 2024
   );
   const total2024 = financial.records
-    .filter((r: any) => r.Year === 2024)
-    .reduce((sum: number, r: any) => sum + r.Revenue_M, 0);
+    .filter((r: FinancialRecord) => r.Year === 2024)
+    .reduce((sum: number, r: FinancialRecord) => sum + r.Revenue_M, 0);
   const aerospaceShare =
-    aerospace2024.reduce((sum: number, r: any) => sum + r.Revenue_M, 0) / total2024;
+    aerospace2024.reduce((sum: number, r: FinancialRecord) => sum + r.Revenue_M, 0) / total2024;
 
   return (
     <main className="min-h-screen bg-gray-100 p-4 md:p-8">
@@ -125,11 +238,11 @@ export default function DashboardPage() {
         <ChartCard title="Profit Trend - Wayne Aerospace">
           <Line
             data={{
-              labels: profitTrend.map((r: any) => `${r.Quarter} ${r.Year}`),
+              labels: profitTrend.map((r: FinancialRecord) => `${r.Quarter} ${r.Year}`),
               datasets: [
                 {
                   label: "Net Profit (M)",
-                  data: profitTrend.map((r: any) => r.Net_Profit_M),
+                  data: profitTrend.map((r: FinancialRecord) => r.Net_Profit_M),
                   borderColor: "#22c55e",
                   backgroundColor: "#bbf7d0",
                   tension: 0.4,
@@ -142,11 +255,11 @@ export default function DashboardPage() {
         <ChartCard title="HR Retention by Department (Latest)">
           <Bar
             data={{
-              labels: retentionByDept.map((r: any) => r.Department),
+              labels: retentionByDept.map((r: HRRecord) => r.Department),
               datasets: [
                 {
                   label: "Retention Rate (%)",
-                  data: retentionByDept.map((r: any) => r.Retention_Rate_Pct),
+                  data: retentionByDept.map((r: HRRecord) => r.Retention_Rate_Pct),
                   backgroundColor: "#f59e42",
                 },
               ],
@@ -157,16 +270,16 @@ export default function DashboardPage() {
         <ChartCard title="R&D Budget vs Spending (Top 5 Projects)">
           <Bar
             data={{
-              labels: topRND.map((r: any) => r.Project_Name),
+              labels: topRND.map((r: RNDRecord) => r.Project_Name),
               datasets: [
                 {
                   label: "Budget Allocated (M)",
-                  data: topRND.map((r: any) => r.Budget_Allocated_M),
+                  data: topRND.map((r: RNDRecord) => r.Budget_Allocated_M),
                   backgroundColor: "#3b82f6",
                 },
                 {
                   label: "Budget Spent (M)",
-                  data: topRND.map((r: any) => r.Budget_Spent_M),
+                  data: topRND.map((r: RNDRecord) => r.Budget_Spent_M),
                   backgroundColor: "#f87171",
                 },
               ],
@@ -177,11 +290,11 @@ export default function DashboardPage() {
         <ChartCard title="Security Incidents by District (Latest)">
           <Bar
             data={{
-              labels: secByDistrict.map((r: any) => r.District),
+              labels: secByDistrict.map((r: SecurityRecord) => r.District),
               datasets: [
                 {
                   label: "Incidents",
-                  data: secByDistrict.map((r: any) => r.Security_Incidents),
+                  data: secByDistrict.map((r: SecurityRecord) => r.Security_Incidents),
                   backgroundColor: "#6366f1",
                 },
               ],
@@ -197,8 +310,8 @@ export default function DashboardPage() {
             datasets: [
               {
                 data: [
-                  aerospace2024.reduce((sum: number, r: any) => sum + r.Revenue_M, 0),
-                  total2024 - aerospace2024.reduce((sum: number, r: any) => sum + r.Revenue_M, 0),
+                  aerospace2024.reduce((sum: number, r: FinancialRecord) => sum + r.Revenue_M, 0),
+                  total2024 - aerospace2024.reduce((sum: number, r: FinancialRecord) => sum + r.Revenue_M, 0),
                 ],
                 backgroundColor: ["#2563eb", "#d1d5db"],
               },
